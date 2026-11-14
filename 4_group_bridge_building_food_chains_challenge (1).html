@@ -1,0 +1,1144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>4-Group Bridge Building: Food Chains (Grade 4)</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Quicksand:wght@600;700;800&display=swap');
+        
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background-color: #070d0d;
+            color: #f8fafc;
+            user-select: none;
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
+
+        .font-game {
+            font-family: 'Fredoka One', cursive;
+        }
+
+        .oman-flag-strip {
+            background: linear-gradient(90deg, #d97706 0%, #dc2626 33.3%, #ffffff 33.3%, #ffffff 66.6%, #16a34a 66.6%, #16a34a 100%);
+        }
+
+        .option-btn {
+            transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+            white-space: normal;
+        }
+        .option-btn:hover {
+            background-color: #1e293b;
+            border-color: #fbbf24;
+        }
+        .option-btn:active {
+            background-color: #334155;
+            transform: scale(0.99);
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-8px); }
+            40%, 80% { transform: translateX(8px); }
+        }
+
+        .shake-element {
+            animation: shake 0.4s ease-in-out;
+        }
+
+        @keyframes floatStar {
+            0% { transform: translateY(8px) scale(0.85); opacity: 0; }
+            25% { opacity: 1; transform: translateY(0px) scale(1.03); }
+            85% { opacity: 1; transform: translateY(-2px) scale(1); }
+            100% { transform: translateY(-8px) scale(0.96); opacity: 0; }
+        }
+
+        .animate-star {
+            animation: floatStar 1.1s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        .bridge-progress-bar {
+            transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        /* Custom sleek dropdown styling for teacher level selector */
+        select.level-select {
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fbbf24' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 0.45rem center;
+            background-size: 0.9em;
+        }
+    </style>
+</head>
+<body class="bg-slate-950 min-h-screen w-full text-slate-100 flex flex-col relative">
+
+<div class="min-h-screen w-full flex flex-col p-2 sm:p-3 relative z-10 bg-slate-950/60">
+    <!-- Top Header: Wraps cleanly so no buttons or titles are ever hidden -->
+    <header class="flex flex-wrap justify-between items-center gap-2 bg-slate-900/95 border-2 border-amber-400/70 rounded-2xl px-3.5 py-2 mb-2.5 shadow-[0_0_20px_rgba(251,191,36,0.25)] backdrop-blur-md shrink-0 relative">
+        <div class="absolute top-0 left-0 right-0 h-1.5 oman-flag-strip rounded-t-2xl"></div>
+        
+        <div class="flex items-center space-x-3 pt-0.5">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-red-600 via-emerald-600 to-amber-400 flex items-center justify-center text-white shadow-lg text-xl border border-amber-300 shrink-0">
+                🌉
+            </div>
+            <div>
+                <h1 class="text-base sm:text-lg md:text-2xl font-game text-transparent bg-clip-text bg-gradient-to-r from-red-400 via-amber-300 to-emerald-400 tracking-wide flex items-center gap-2 leading-tight">
+                    FOOD CHAINS BRIDGE CHALLENGE 🇴🇲
+                </h1>
+                <p class="text-xs sm:text-sm text-amber-300 font-extrabold leading-snug">Grade 4 Science • Answer right to build your bridge!</p>
+            </div>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2 pt-0.5">
+            <!-- Global Level Set Buttons: Always visible so teachers can switch levels on any screen -->
+            <div class="flex items-center bg-slate-950/90 border border-slate-700 rounded-xl p-1 gap-1">
+                <span class="text-[11px] font-extrabold text-slate-300 px-1.5 uppercase">All Levels:</span>
+                <button onclick="setAllLevels('easy')" class="bg-emerald-600/30 hover:bg-emerald-600/60 text-emerald-200 border border-emerald-500/60 text-xs font-extrabold px-2.5 py-1 rounded-lg transition">Easy</button>
+                <button onclick="setAllLevels('medium')" class="bg-amber-500/30 hover:bg-amber-500/60 text-amber-200 border border-amber-500/60 text-xs font-extrabold px-2.5 py-1 rounded-lg transition">Medium</button>
+                <button onclick="setAllLevels('hard')" class="bg-red-600/30 hover:bg-red-600/60 text-red-200 border border-red-500/60 text-xs font-extrabold px-2.5 py-1 rounded-lg transition">Hard</button>
+            </div>
+
+            <button onclick="showLeaderboardModal()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-game py-2 px-3.5 rounded-xl text-xs sm:text-sm md:text-base flex items-center gap-1.5 shadow-lg transition active:scale-95 border border-amber-200">
+                <i class="fa-solid fa-trophy"></i> <span>Winners</span>
+            </button>
+            <button onclick="resetAllGames()" class="bg-gradient-to-r from-red-600 via-emerald-600 to-amber-500 hover:brightness-110 text-white font-game py-2 px-3.5 rounded-xl text-xs sm:text-sm md:text-base flex items-center gap-1.5 shadow-lg transition active:scale-95 border border-amber-300">
+                <i class="fa-solid fa-rotate-right"></i> <span>Restart</span>
+            </button>
+            <button onclick="toggleAudio()" id="mute-btn" aria-label="Toggle Sound" class="bg-slate-800 hover:bg-slate-700 text-amber-300 border border-slate-700 font-bold p-2.5 rounded-xl transition shadow-md">
+                <i class="fa-solid fa-volume-high text-base"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- 4-Group Vertical Stacked Rows: Flexible height so text is never clipped -->
+    <main class="flex flex-col gap-2.5 flex-1 justify-between">
+        
+        <!-- GROUP 1 (Red) -->
+        <div id="group-1" class="bg-slate-900/95 border-2 border-red-500/80 rounded-2xl px-3 py-2 flex flex-col md:flex-row items-stretch md:items-center gap-3 relative shadow-xl flex-1 min-h-[136px]">
+            <!-- Left Column: Group Title, Level Selector, Score & Bridge Progress -->
+            <div class="w-full md:w-64 lg:w-72 shrink-0 flex flex-col justify-between bg-slate-950/90 border border-red-500/50 rounded-xl px-3 py-2 gap-1.5">
+                <div class="flex justify-between items-center gap-1">
+                    <div class="flex items-center gap-2">
+                        <div class="w-8 h-8 rounded-lg bg-red-600 border border-red-400 flex items-center justify-center text-white shadow text-base font-black shrink-0">1</div>
+                        <div>
+                            <h2 class="font-game text-base lg:text-xl text-red-300 leading-tight">Group 1</h2>
+                            <select id="level-select-1" onchange="changeGroupLevel(1, this.value)" aria-label="Group 1 Level"
+                                    class="level-select mt-0.5 bg-slate-900 text-amber-300 border border-red-500/60 rounded-md text-xs font-extrabold pl-2 pr-6 py-0.5 cursor-pointer focus:outline-none focus:border-amber-400">
+                                <option value="easy">⭐ Level 1: Easy</option>
+                                <option value="medium">⭐⭐ Level 2: Medium</option>
+                                <option value="hard">⭐⭐⭐ Level 3: Hard</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-1.5 shrink-0">
+                        <span id="rank-badge-1" class="hidden text-xs font-game bg-red-600/40 text-red-200 border border-red-400 px-2 py-0.5 rounded-full"></span>
+                        <div class="bg-slate-900 border-2 border-amber-400 px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                            <i class="fa-solid fa-star text-amber-400 text-xs"></i>
+                            <span id="score-1" class="font-game text-sm lg:text-lg text-amber-300">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex flex-col gap-1">
+                    <div class="flex justify-between items-center text-xs font-black text-slate-200">
+                        <span class="flex items-center gap-1.5 text-red-300"><i class="fa-solid fa-bridge"></i> Bridge</span>
+                        <span id="bridge-status-1" class="text-amber-300 font-game text-xs">0% Built</span>
+                    </div>
+                    <div class="w-full bg-slate-800 h-5 rounded-full p-0.5 relative border border-slate-700">
+                        <div id="bridge-bar-1" class="bg-gradient-to-r from-red-600 via-amber-500 to-emerald-500 h-full rounded-full w-0 bridge-progress-bar flex items-center justify-end pr-2 text-[11px] font-black text-slate-950"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Middle & Right Sections -->
+            <div id="content-1" class="flex-1 flex flex-col lg:flex-row items-stretch lg:items-center gap-2.5 min-w-0"></div>
+            <div id="feedback-1" class="absolute inset-0 pointer-events-none flex items-center justify-center z-30 p-2"></div>
+        </div>
+
+        <!-- GROUP 2 (Emerald) -->
+        <div id="group-2" class="bg-slate-900/95 border-2 border-emerald-500/80 rounded-2xl px-3 py-2 flex flex-col md:flex-row items-stretch md:items-center gap-3 relative shadow-xl flex-1 min-h-[136px]">
+            <!-- Left Column -->
+            <div class="w-full md:w-64 lg:w-72 shrink-0 flex flex-col justify-between bg-slate-950/90 border border-emerald-500/50 rounded-xl px-3 py-2 gap-1.5">
+                <div class="flex justify-between items-center gap-1">
+                    <div class="flex items-center gap-2">
+                        <div class="w-8 h-8 rounded-lg bg-emerald-600 border border-emerald-400 flex items-center justify-center text-white shadow text-base font-black shrink-0">2</div>
+                        <div>
+                            <h2 class="font-game text-base lg:text-xl text-emerald-300 leading-tight">Group 2</h2>
+                            <select id="level-select-2" onchange="changeGroupLevel(2, this.value)" aria-label="Group 2 Level"
+                                    class="level-select mt-0.5 bg-slate-900 text-amber-300 border border-emerald-500/60 rounded-md text-xs font-extrabold pl-2 pr-6 py-0.5 cursor-pointer focus:outline-none focus:border-amber-400">
+                                <option value="easy">⭐ Level 1: Easy</option>
+                                <option value="medium" selected>⭐⭐ Level 2: Medium</option>
+                                <option value="hard">⭐⭐⭐ Level 3: Hard</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-1.5 shrink-0">
+                        <span id="rank-badge-2" class="hidden text-xs font-game bg-emerald-600/40 text-emerald-200 border border-emerald-400 px-2 py-0.5 rounded-full"></span>
+                        <div class="bg-slate-900 border-2 border-amber-400 px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                            <i class="fa-solid fa-star text-amber-400 text-xs"></i>
+                            <span id="score-2" class="font-game text-sm lg:text-lg text-amber-300">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex flex-col gap-1">
+                    <div class="flex justify-between items-center text-xs font-black text-slate-200">
+                        <span class="flex items-center gap-1.5 text-emerald-300"><i class="fa-solid fa-bridge"></i> Bridge</span>
+                        <span id="bridge-status-2" class="text-amber-300 font-game text-xs">0% Built</span>
+                    </div>
+                    <div class="w-full bg-slate-800 h-5 rounded-full p-0.5 relative border border-slate-700">
+                        <div id="bridge-bar-2" class="bg-gradient-to-r from-red-600 via-amber-500 to-emerald-500 h-full rounded-full w-0 bridge-progress-bar flex items-center justify-end pr-2 text-[11px] font-black text-slate-950"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Middle & Right Sections -->
+            <div id="content-2" class="flex-1 flex flex-col lg:flex-row items-stretch lg:items-center gap-2.5 min-w-0"></div>
+            <div id="feedback-2" class="absolute inset-0 pointer-events-none flex items-center justify-center z-30 p-2"></div>
+        </div>
+
+        <!-- GROUP 3 (Slate/White) -->
+        <div id="group-3" class="bg-slate-900/95 border-2 border-slate-300/80 rounded-2xl px-3 py-2 flex flex-col md:flex-row items-stretch md:items-center gap-3 relative shadow-xl flex-1 min-h-[136px]">
+            <!-- Left Column -->
+            <div class="w-full md:w-64 lg:w-72 shrink-0 flex flex-col justify-between bg-slate-950/90 border border-slate-400/50 rounded-xl px-3 py-2 gap-1.5">
+                <div class="flex justify-between items-center gap-1">
+                    <div class="flex items-center gap-2">
+                        <div class="w-8 h-8 rounded-lg bg-slate-200 border border-white flex items-center justify-center text-slate-950 shadow text-base font-black shrink-0">3</div>
+                        <div>
+                            <h2 class="font-game text-base lg:text-xl text-slate-100 leading-tight">Group 3</h2>
+                            <select id="level-select-3" onchange="changeGroupLevel(3, this.value)" aria-label="Group 3 Level"
+                                    class="level-select mt-0.5 bg-slate-900 text-amber-300 border border-slate-400/60 rounded-md text-xs font-extrabold pl-2 pr-6 py-0.5 cursor-pointer focus:outline-none focus:border-amber-400">
+                                <option value="easy">⭐ Level 1: Easy</option>
+                                <option value="medium" selected>⭐⭐ Level 2: Medium</option>
+                                <option value="hard">⭐⭐⭐ Level 3: Hard</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-1.5 shrink-0">
+                        <span id="rank-badge-3" class="hidden text-xs font-game bg-slate-100/20 text-slate-100 border border-slate-300 px-2 py-0.5 rounded-full"></span>
+                        <div class="bg-slate-900 border-2 border-amber-400 px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                            <i class="fa-solid fa-star text-amber-400 text-xs"></i>
+                            <span id="score-3" class="font-game text-sm lg:text-lg text-amber-300">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex flex-col gap-1">
+                    <div class="flex justify-between items-center text-xs font-black text-slate-200">
+                        <span class="flex items-center gap-1.5 text-slate-200"><i class="fa-solid fa-bridge"></i> Bridge</span>
+                        <span id="bridge-status-3" class="text-amber-300 font-game text-xs">0% Built</span>
+                    </div>
+                    <div class="w-full bg-slate-800 h-5 rounded-full p-0.5 relative border border-slate-700">
+                        <div id="bridge-bar-3" class="bg-gradient-to-r from-red-600 via-amber-500 to-emerald-500 h-full rounded-full w-0 bridge-progress-bar flex items-center justify-end pr-2 text-[11px] font-black text-slate-950"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Middle & Right Sections -->
+            <div id="content-3" class="flex-1 flex flex-col lg:flex-row items-stretch lg:items-center gap-2.5 min-w-0"></div>
+            <div id="feedback-3" class="absolute inset-0 pointer-events-none flex items-center justify-center z-30 p-2"></div>
+        </div>
+
+        <!-- GROUP 4 (Amber/Gold) -->
+        <div id="group-4" class="bg-slate-900/95 border-2 border-amber-400/80 rounded-2xl px-3 py-2 flex flex-col md:flex-row items-stretch md:items-center gap-3 relative shadow-xl flex-1 min-h-[136px]">
+            <!-- Left Column -->
+            <div class="w-full md:w-64 lg:w-72 shrink-0 flex flex-col justify-between bg-slate-950/90 border border-amber-400/50 rounded-xl px-3 py-2 gap-1.5">
+                <div class="flex justify-between items-center gap-1">
+                    <div class="flex items-center gap-2">
+                        <div class="w-8 h-8 rounded-lg bg-amber-500 border border-amber-300 flex items-center justify-center text-slate-950 shadow text-base font-black shrink-0">4</div>
+                        <div>
+                            <h2 class="font-game text-base lg:text-xl text-amber-300 leading-tight">Group 4</h2>
+                            <select id="level-select-4" onchange="changeGroupLevel(4, this.value)" aria-label="Group 4 Level"
+                                    class="level-select mt-0.5 bg-slate-900 text-amber-300 border border-amber-400/60 rounded-md text-xs font-extrabold pl-2 pr-6 py-0.5 cursor-pointer focus:outline-none focus:border-amber-400">
+                                <option value="easy">⭐ Level 1: Easy</option>
+                                <option value="medium">⭐⭐ Level 2: Medium</option>
+                                <option value="hard" selected>⭐⭐⭐ Level 3: Hard</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-1.5 shrink-0">
+                        <span id="rank-badge-4" class="hidden text-xs font-game bg-amber-500/30 text-amber-200 border border-amber-400 px-2 py-0.5 rounded-full"></span>
+                        <div class="bg-slate-900 border-2 border-amber-400 px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                            <i class="fa-solid fa-star text-amber-400 text-xs"></i>
+                            <span id="score-4" class="font-game text-sm lg:text-lg text-amber-300">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex flex-col gap-1">
+                    <div class="flex justify-between items-center text-xs font-black text-slate-200">
+                        <span class="flex items-center gap-1.5 text-amber-300"><i class="fa-solid fa-bridge"></i> Bridge</span>
+                        <span id="bridge-status-4" class="text-amber-300 font-game text-xs">0% Built</span>
+                    </div>
+                    <div class="w-full bg-slate-800 h-5 rounded-full p-0.5 relative border border-slate-700">
+                        <div id="bridge-bar-4" class="bg-gradient-to-r from-red-600 via-amber-500 to-emerald-500 h-full rounded-full w-0 bridge-progress-bar flex items-center justify-end pr-2 text-[11px] font-black text-slate-950"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Middle & Right Sections -->
+            <div id="content-4" class="flex-1 flex flex-col lg:flex-row items-stretch lg:items-center gap-2.5 min-w-0"></div>
+            <div id="feedback-4" class="absolute inset-0 pointer-events-none flex items-center justify-center z-30 p-2"></div>
+        </div>
+
+    </main>
+</div>
+
+<!-- LEADERBOARD MODAL -->
+<div id="leaderboard-modal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 flex items-center justify-center hidden p-4 overflow-y-auto">
+    <div class="bg-slate-900 border-2 border-amber-400 rounded-2xl max-w-lg w-full p-5 shadow-2xl relative text-center my-auto">
+        <div class="absolute top-0 left-0 right-0 h-1.5 oman-flag-strip rounded-t-2xl"></div>
+        <button onclick="closeLeaderboardModal()" aria-label="Close Winners Window" class="absolute top-3 right-3 text-slate-300 hover:text-white text-xl p-1">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+        
+        <div class="text-4xl mb-1 animate-bounce">🌉 🇴🇲</div>
+        <h2 class="font-game text-2xl text-amber-300 tracking-wide">BRIDGE BUILDING WINNERS</h2>
+        <p class="text-sm text-slate-200 font-bold mb-4">Group Scores & Bridge Results</p>
+
+        <div id="podium-list" class="space-y-2.5 mb-4"></div>
+
+        <div class="bg-slate-950/90 border border-slate-700 p-3 rounded-xl text-left text-sm text-slate-200 mb-4">
+            <span class="font-bold text-amber-400"><i class="fa-solid fa-clipboard-check mr-1"></i> Class Result:</span>
+            <p id="teacher-note" class="mt-1 text-slate-100 font-bold leading-snug">Bridges built by answering science questions right!</p>
+        </div>
+
+        <div class="flex flex-wrap justify-center gap-3">
+            <button onclick="closeLeaderboardModal()" class="bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-100 font-bold px-5 py-2.5 rounded-xl text-sm">
+                Close
+            </button>
+            <button onclick="resetAllGames(); closeLeaderboardModal();" class="bg-gradient-to-r from-red-600 via-emerald-600 to-amber-500 text-white font-game px-5 py-2.5 rounded-xl text-sm shadow-lg hover:brightness-110">
+                Play Again
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Web Audio API Sound Effects Setup
+    let audioCtx = null;
+    let soundEnabled = true;
+
+    function initAudio() {
+        if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtx && audioCtx.state === 'suspended') {
+            audioCtx.resume().catch(function(e){});
+        }
+    }
+
+    function toggleAudio() {
+        soundEnabled = !soundEnabled;
+        document.getElementById('mute-btn').innerHTML = soundEnabled 
+            ? '<i class="fa-solid fa-volume-high text-base"></i>' 
+            : '<i class="fa-solid fa-volume-xmark text-base text-red-400"></i>';
+    }
+
+    function playBuildSound() {
+        if (!soundEnabled) return;
+        initAudio();
+        if (!audioCtx) return;
+        try {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(300, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(600, audioCtx.currentTime + 0.3);
+            gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.3);
+        } catch(e) {}
+    }
+
+    function playClapSound() {
+        if (!soundEnabled) return;
+        initAudio();
+        if (!audioCtx) return;
+        try {
+            const duration = 0.8;
+            const bufferSize = audioCtx.sampleRate * duration;
+            const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+            const data = buffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+
+            const noise = audioCtx.createBufferSource();
+            noise.buffer = buffer;
+            const filter = audioCtx.createBiquadFilter();
+            filter.type = 'bandpass';
+            filter.frequency.value = 1200;
+
+            const gain = audioCtx.createGain();
+            gain.gain.setValueAtTime(0.01, audioCtx.currentTime);
+            for(let t = 0; t < 0.7; t += 0.08) {
+                gain.gain.setValueAtTime(0.4, audioCtx.currentTime + t);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + t + 0.04);
+            }
+
+            noise.connect(filter);
+            filter.connect(gain);
+            gain.connect(audioCtx.destination);
+            noise.start();
+            noise.stop(audioCtx.currentTime + duration);
+        } catch(e) {}
+    }
+
+    function playSadSound() {
+        if (!soundEnabled) return;
+        initAudio();
+        if (!audioCtx) return;
+        try {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(200, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(90, audioCtx.currentTime + 0.45);
+            gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.45);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.45);
+        } catch(e) {}
+    }
+
+    /**
+     * Grade 4 Science Question Bank: "Food chains"
+     * Uses clear, simple Grade 4 words:
+     * food chain, producer, consumer, energy, plant, animal, eat, corn, hen, boy, arrow.
+     */
+    const lessonQuestionBank = {
+        1: {
+            easy: [
+                {
+                    question: "What does a food chain show?",
+                    options: [
+                        "Order animals eat for energy",
+                        "How rocks are made",
+                        "How many legs animals have",
+                        "Today's weather"
+                    ],
+                    answer: 0,
+                    hint: "A food chain shows the eating order to get energy!"
+                },
+                {
+                    question: "What do ALL food chains have?",
+                    options: [
+                        "A producer and a consumer",
+                        "Rocks and sand",
+                        "Only big animals",
+                        "Only consumers"
+                    ],
+                    answer: 0,
+                    hint: "Every food chain has a producer and a consumer!"
+                },
+                {
+                    question: "In 'corn → hen', which one is the producer?",
+                    options: [
+                        "Corn",
+                        "Hen",
+                        "Neither one",
+                        "Both of them"
+                    ],
+                    answer: 0,
+                    hint: "Corn is a plant, so it is the producer!"
+                }
+            ],
+            medium: [
+                {
+                    question: "How does energy move in a food chain?",
+                    options: [
+                        "From producer to consumer",
+                        "From consumer to producer",
+                        "From hen to corn",
+                        "Energy never moves"
+                    ],
+                    answer: 0,
+                    hint: "Energy moves from the producer to the consumer!"
+                },
+                {
+                    question: "What is the order in every food chain?",
+                    options: [
+                        "producer → consumer",
+                        "consumer → producer",
+                        "consumer → consumer",
+                        "producer → producer"
+                    ],
+                    answer: 0,
+                    hint: "The order is always: producer → consumer!"
+                },
+                {
+                    question: "In 'corn → hen', what is the hen?",
+                    options: [
+                        "The consumer",
+                        "The producer",
+                        "The Sun",
+                        "A plant"
+                    ],
+                    answer: 0,
+                    hint: "The hen eats corn, so the hen is a consumer!"
+                }
+            ],
+            hard: [
+                {
+                    question: "What do the arrows (→) in a food chain show?",
+                    options: [
+                        "Which way energy moves",
+                        "Which animal runs fastest",
+                        "Which way the wind blows",
+                        "Which animal is biggest"
+                    ],
+                    answer: 0,
+                    hint: "Arrows show the direction that energy moves!"
+                },
+                {
+                    question: "A boy eats the hen. Which food chain is right?",
+                    options: [
+                        "corn → hen → boy",
+                        "boy → hen → corn",
+                        "hen → corn → boy",
+                        "corn → boy → hen"
+                    ],
+                    answer: 0,
+                    hint: "The food chain is: corn → hen → boy!"
+                },
+                {
+                    question: "Why does energy move from corn to hen?",
+                    options: [
+                        "The hen eats the corn",
+                        "The corn eats the hen",
+                        "The hen makes sunlight",
+                        "Arrows push the energy"
+                    ],
+                    answer: 0,
+                    hint: "The consumer gets energy by eating the producer!"
+                }
+            ]
+        },
+        2: {
+            easy: [
+                {
+                    question: "In 'corn → hen', which one is the consumer?",
+                    options: [
+                        "Hen",
+                        "Corn",
+                        "Sun",
+                        "Soil"
+                    ],
+                    answer: 0,
+                    hint: "The hen eats the corn, so it is the consumer!"
+                },
+                {
+                    question: "Which way does energy move?",
+                    options: [
+                        "From producer to consumer",
+                        "From consumer to producer",
+                        "From boy to corn",
+                        "It stays in one place"
+                    ],
+                    answer: 0,
+                    hint: "Energy moves from producer to consumer!"
+                },
+                {
+                    question: "Which food chain is drawn right?",
+                    options: [
+                        "corn → hen",
+                        "hen → corn",
+                        "corn ← hen",
+                        "hen → boy"
+                    ],
+                    answer: 0,
+                    hint: "Food chain 1 is drawn: corn → hen!"
+                }
+            ],
+            medium: [
+                {
+                    question: "A boy eats the hen. What is the boy?",
+                    options: [
+                        "Another consumer",
+                        "A producer",
+                        "A plant",
+                        "Sunlight"
+                    ],
+                    answer: 0,
+                    hint: "The boy eats the hen, so he is another consumer!"
+                },
+                {
+                    question: "How many consumers are in 'corn → hen → boy'?",
+                    options: [
+                        "Two consumers",
+                        "Zero consumers",
+                        "One consumer",
+                        "Three producers"
+                    ],
+                    answer: 0,
+                    hint: "Both the hen and the boy are consumers!"
+                },
+                {
+                    question: "What does the arrow in 'corn → hen' mean?",
+                    options: [
+                        "Energy goes to the hen",
+                        "Corn eats the hen",
+                        "Hen feeds the corn",
+                        "No energy moves"
+                    ],
+                    answer: 0,
+                    hint: "The arrow shows energy moving from corn to hen!"
+                }
+            ],
+            hard: [
+                {
+                    question: "Why is 'hen → corn' drawn WRONG?",
+                    options: [
+                        "Energy goes producer to consumer",
+                        "Hens are producers",
+                        "Corn eats hens",
+                        "Arrows are not allowed"
+                    ],
+                    answer: 0,
+                    hint: "Food chains always go: producer → consumer!"
+                },
+                {
+                    question: "In 'corn → hen → boy', how does the boy get energy?",
+                    options: [
+                        "By eating the hen",
+                        "By making his own food",
+                        "From sunlight only",
+                        "From rocks and water"
+                    ],
+                    answer: 0,
+                    hint: "Energy moves from corn → hen → boy!"
+                },
+                {
+                    question: "Which rule is true for EVERY food chain?",
+                    options: [
+                        "It starts with a producer",
+                        "It starts with a consumer",
+                        "It ends with a producer",
+                        "It has zero consumers"
+                    ],
+                    answer: 0,
+                    hint: "Every food chain starts with a producer!"
+                }
+            ]
+        },
+        3: {
+            easy: [
+                {
+                    question: "What is first in 'corn → hen → boy'?",
+                    options: [
+                        "Corn (producer)",
+                        "Hen (consumer)",
+                        "Boy (consumer)",
+                        "A tiger"
+                    ],
+                    answer: 0,
+                    hint: "Corn is the plant producer at the start!"
+                },
+                {
+                    question: "In 'corn → hen → boy', who eats the hen?",
+                    options: [
+                        "The boy",
+                        "The corn",
+                        "Nobody",
+                        "A snail"
+                    ],
+                    answer: 0,
+                    hint: "The boy eats the hen!"
+                },
+                {
+                    question: "What sign connects living things in a food chain?",
+                    options: [
+                        "An arrow (→)",
+                        "A question mark (?)",
+                        "A minus sign (-)",
+                        "A star (*)"
+                    ],
+                    answer: 0,
+                    hint: "We use arrows (→) to show where energy goes!"
+                }
+            ],
+            medium: [
+                {
+                    question: "Which is the ONLY producer in 'corn → hen → boy'?",
+                    options: [
+                        "Corn",
+                        "Hen",
+                        "Boy",
+                        "Hen and boy"
+                    ],
+                    answer: 0,
+                    hint: "Corn is the only plant producer!"
+                },
+                {
+                    question: "Why can a food chain NOT start with a consumer?",
+                    options: [
+                        "Order is producer → consumer",
+                        "Consumers need no energy",
+                        "Producers eat consumers",
+                        "Arrows point left"
+                    ],
+                    answer: 0,
+                    hint: "The order is always: producer → consumer!"
+                },
+                {
+                    question: "How many consumers must a food chain have?",
+                    options: [
+                        "At least one",
+                        "At least ten",
+                        "Zero consumers",
+                        "At least five"
+                    ],
+                    answer: 0,
+                    hint: "Food chains have a producer and at least one consumer!"
+                }
+            ],
+            hard: [
+                {
+                    question: "What does 'hen → boy' show in the food chain?",
+                    options: [
+                        "Energy moves hen to boy",
+                        "Boy feeds the hen",
+                        "Hen makes its own food",
+                        "Corn eats the boy"
+                    ],
+                    answer: 0,
+                    hint: "The arrow shows energy moving from hen to boy!"
+                },
+                {
+                    question: "What happened when the boy ate the hen?",
+                    options: [
+                        "Another consumer was added",
+                        "Corn became a consumer",
+                        "Hen became a producer",
+                        "The arrows turned around"
+                    ],
+                    answer: 0,
+                    hint: "The boy became another consumer in the chain!"
+                },
+                {
+                    question: "How must you draw a food chain?",
+                    options: [
+                        "producer → consumer",
+                        "consumer → producer",
+                        "consumer → consumer",
+                        "producer ← consumer"
+                    ],
+                    answer: 0,
+                    hint: "Always draw: producer → consumer!"
+                }
+            ]
+        },
+        4: {
+            easy: [
+                {
+                    question: "Finish the food chain: corn → _____ → boy",
+                    options: [
+                        "hen",
+                        "sun",
+                        "rock",
+                        "corn"
+                    ],
+                    answer: 0,
+                    hint: "The food chain is: corn → hen → boy!"
+                },
+                {
+                    question: "What does a consumer eat to get energy?",
+                    options: [
+                        "Plants or animals",
+                        "Rocks and sand",
+                        "Only air",
+                        "Arrows"
+                    ],
+                    answer: 0,
+                    hint: "Consumers eat plants or other animals!"
+                },
+                {
+                    question: "What is corn in 'corn → hen'?",
+                    options: [
+                        "A producer",
+                        "A consumer",
+                        "An animal",
+                        "A rock"
+                    ],
+                    answer: 0,
+                    hint: "Corn is a plant producer!"
+                }
+            ],
+            medium: [
+                {
+                    question: "What moves from one living thing to the next?",
+                    options: [
+                        "Food and its energy",
+                        "Only rocks",
+                        "Only feathers",
+                        "Nothing moves"
+                    ],
+                    answer: 0,
+                    hint: "Food and the energy inside it move along the chain!"
+                },
+                {
+                    question: "Which chain has 1 producer and 2 consumers?",
+                    options: [
+                        "corn → hen → boy",
+                        "corn → hen",
+                        "hen → corn",
+                        "boy → corn"
+                    ],
+                    answer: 0,
+                    hint: "Corn (producer) → hen (consumer) → boy (consumer)!"
+                },
+                {
+                    question: "Finish the rule: Order is always ________.",
+                    options: [
+                        "producer → consumer",
+                        "consumer → producer",
+                        "boy → hen → corn",
+                        "animal → plant"
+                    ],
+                    answer: 0,
+                    hint: "The order is always: producer → consumer!"
+                }
+            ],
+            hard: [
+                {
+                    question: "Why is 'boy → hen → corn' WRONG?",
+                    options: [
+                        "Energy goes backwards",
+                        "Boy is a producer",
+                        "Hens eat boys",
+                        "It needs no consumers"
+                    ],
+                    answer: 0,
+                    hint: "Energy must go from producer → consumer!"
+                },
+                {
+                    question: "Why is corn first in 'corn → hen → boy'?",
+                    options: [
+                        "Corn is the producer",
+                        "Corn eats the hen",
+                        "Corn is the biggest",
+                        "Corn comes first in ABCs"
+                    ],
+                    answer: 0,
+                    hint: "Food chains always start with a producer!"
+                },
+                {
+                    question: "Where do all food chain arrows point?",
+                    options: [
+                        "To who gets the energy",
+                        "To who gets eaten",
+                        "To the Sun",
+                        "Backwards to plants"
+                    ],
+                    answer: 0,
+                    hint: "Arrows show the direction that energy moves!"
+                }
+            ]
+        }
+    };
+
+    // State Tracker for All 4 Groups
+    const gameState = {
+        1: { level: 'easy', index: 0, score: 0, bridgeProgress: 0, correctCount: 0, wrongCount: 0, finishTime: null },
+        2: { level: 'medium', index: 0, score: 0, bridgeProgress: 0, correctCount: 0, wrongCount: 0, finishTime: null },
+        3: { level: 'medium', index: 0, score: 0, bridgeProgress: 0, correctCount: 0, wrongCount: 0, finishTime: null },
+        4: { level: 'hard', index: 0, score: 0, bridgeProgress: 0, correctCount: 0, wrongCount: 0, finishTime: null }
+    };
+
+    let finishOrder = [];
+
+    // Switch difficulty level for an individual group
+    function changeGroupLevel(groupId, newLevel) {
+        gameState[groupId].level = newLevel;
+        restartGroup(groupId);
+    }
+
+    // Switch all 4 groups to a specific level at once
+    function setAllLevels(newLevel) {
+        finishOrder = [];
+        for (let i = 1; i <= 4; i++) {
+            gameState[i].level = newLevel;
+            const selectEl = document.getElementById(`level-select-${i}`);
+            if (selectEl) selectEl.value = newLevel;
+            restartGroup(i);
+        }
+    }
+
+    function getLevelLabel(level) {
+        if (level === 'easy') return 'Level 1: Easy';
+        if (level === 'medium') return 'Level 2: Medium';
+        return 'Level 3: Hard';
+    }
+
+    function renderQuestion(groupId) {
+        const group = gameState[groupId];
+        const questions = lessonQuestionBank[groupId][group.level];
+        const container = document.getElementById(`content-${groupId}`);
+
+        if (!container) return;
+
+        // Update Bridge Progress Bar & Status Text
+        const bridgeBar = document.getElementById(`bridge-bar-${groupId}`);
+        const bridgeStatus = document.getElementById(`bridge-status-${groupId}`);
+        const percent = Math.round((group.bridgeProgress / 3) * 100);
+        
+        if (bridgeBar) {
+            bridgeBar.style.width = `${percent}%`;
+            bridgeBar.innerText = percent > 0 ? `${percent}%` : '';
+        }
+        if (bridgeStatus) {
+            bridgeStatus.innerText = percent === 100 ? '100% BUILT! 🌉' : `${percent}% Built`;
+        }
+
+        if (group.index >= questions.length) {
+            let rankText = "";
+            const pos = finishOrder.indexOf(groupId) + 1;
+            if (pos === 1) rankText = "1st Place 🥇";
+            else if (pos === 2) rankText = "2nd Place 🥈";
+            else if (pos === 3) rankText = "3rd Place 🥉";
+            else if (pos > 0) rankText = `${pos}th Place 🏁`;
+            else rankText = "Done 🏁";
+
+            container.innerHTML = `
+                <div class="w-full flex flex-wrap items-center justify-between gap-3 bg-slate-950/90 border-2 border-amber-400/60 rounded-xl px-4 py-2.5">
+                    <div class="flex items-center gap-3">
+                        <span class="text-3xl lg:text-4xl animate-bounce">🌉</span>
+                        <div>
+                            <h3 class="font-game text-lg lg:text-2xl text-amber-300 leading-tight">BRIDGE COMPLETE! 🌉 🇴🇲</h3>
+                            <p class="text-xs sm:text-sm lg:text-base text-slate-100 font-black">
+                                <span class="text-xs uppercase bg-slate-800 border border-slate-600 px-2 py-0.5 rounded mr-1.5 text-amber-300">${getLevelLabel(group.level)}</span>
+                                Score: <span class="text-amber-400 text-base lg:text-xl">${group.score} Stars</span> (${group.correctCount}/3 Right)
+                            </p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2.5">
+                        <div class="bg-amber-400/20 border-2 border-amber-400 px-3.5 py-1 rounded-full">
+                            <span class="font-game text-sm lg:text-xl text-amber-300">${rankText}</span>
+                        </div>
+                        <button onclick="restartGroup(${groupId})" class="bg-slate-800 hover:bg-slate-700 text-xs lg:text-sm px-3.5 py-2 rounded-xl border border-slate-500 text-slate-100 font-extrabold shadow-md">Play Again</button>
+                    </div>
+                </div>
+            `;
+            return;
+        }
+
+        const qData = questions[group.index];
+        let optionsHTML = '';
+        qData.options.forEach((opt, idx) => {
+            optionsHTML += `
+                <button onclick="checkAnswer(${groupId}, ${idx})" 
+                        class="option-btn w-full h-full text-left bg-slate-950/95 hover:bg-slate-800 border-2 border-slate-600 hover:border-amber-400 px-3 py-2 rounded-xl text-sm sm:text-base lg:text-lg font-black text-white flex items-center gap-2.5 shadow-md border-l-4 border-l-amber-400 whitespace-normal break-words">
+                    <span class="w-7 h-7 lg:w-8 lg:h-8 rounded-lg border-2 border-amber-400 flex items-center justify-center shrink-0 text-xs lg:text-sm text-amber-300 font-game bg-slate-900 font-black">${String.fromCharCode(65 + idx)}</span>
+                    <span class="leading-snug font-extrabold text-slate-100 flex-1 whitespace-normal break-words">${opt}</span>
+                </button>
+            `;
+        });
+
+        const levelBadgeColors = {
+            easy: 'text-emerald-300',
+            medium: 'text-amber-300',
+            hard: 'text-red-300'
+        };
+
+        container.innerHTML = `
+            <!-- Middle Section: Clear, Unclipped Question -->
+            <div class="flex-1 bg-slate-950 px-3.5 py-2 rounded-xl border-2 border-slate-700 flex flex-col justify-center min-w-0">
+                <div class="flex items-center justify-between gap-2 mb-0.5">
+                    <span class="text-xs lg:text-sm font-black tracking-wider text-amber-400 uppercase">Question ${group.index + 1} of 3</span>
+                    <span class="text-xs lg:text-sm font-extrabold uppercase ${levelBadgeColors[group.level]}">${getLevelLabel(group.level)}</span>
+                </div>
+                <h3 class="text-base sm:text-lg lg:text-xl font-black text-white leading-snug whitespace-normal break-words">${qData.question}</h3>
+            </div>
+            <!-- Right Section: 2x2 Grid of Clear Answer Buttons -->
+            <div class="w-full lg:w-[54%] shrink-0 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                ${optionsHTML}
+            </div>
+        `;
+    }
+
+    function checkAnswer(groupId, selectedIdx) {
+        const group = gameState[groupId];
+        const currentQ = lessonQuestionBank[groupId][group.level][group.index];
+        const groupCard = document.getElementById(`group-${groupId}`);
+        const feedbackContainer = document.getElementById(`feedback-${groupId}`);
+
+        if (selectedIdx === currentQ.answer) {
+            group.score += 10;
+            group.bridgeProgress += 1;
+            group.correctCount += 1;
+            document.getElementById(`score-${groupId}`).innerText = group.score;
+
+            playBuildSound();
+            playClapSound();
+            try { confetti({ particleCount: 35, spread: 60, colors: ['#dc2626', '#ffffff', '#16a34a', '#fbbf24'] }); } catch(e){}
+
+            feedbackContainer.innerHTML = `
+                <div class="flex flex-wrap items-center justify-center gap-2.5 animate-star z-30 bg-emerald-950/95 px-5 py-2.5 rounded-xl border-2 border-amber-400 shadow-2xl backdrop-blur-md max-w-[95%]">
+                    <span class="font-game text-base sm:text-lg lg:text-xl text-emerald-300">BRIDGE PIECE ADDED! 🌉</span>
+                    <span class="text-sm sm:text-base lg:text-lg text-amber-300 font-extrabold">+10 STARS</span>
+                </div>
+            `;
+
+            setTimeout(() => {
+                feedbackContainer.innerHTML = '';
+                group.index += 1;
+
+                if (group.index >= 3 && !group.finishTime) {
+                    group.finishTime = Date.now();
+                    if (!finishOrder.includes(groupId)) finishOrder.push(groupId);
+                    updateRankBadge(groupId);
+                }
+
+                renderQuestion(groupId);
+                checkAllFinished();
+            }, 1050);
+
+        } else {
+            group.wrongCount += 1;
+            playSadSound();
+            groupCard.classList.add('shake-element');
+            setTimeout(() => groupCard.classList.remove('shake-element'), 400);
+
+            feedbackContainer.innerHTML = `
+                <div class="flex items-center gap-3 animate-bounce z-30 bg-red-950/95 px-5 py-2.5 rounded-xl border-2 border-red-400 backdrop-blur-md shadow-2xl max-w-[95%]">
+                    <span class="text-2xl sm:text-3xl shrink-0">😢</span>
+                    <div class="text-left">
+                        <span class="font-game text-sm sm:text-base lg:text-lg text-red-300 block leading-tight">NOT QUITE! KEEP GOING!</span>
+                        <p class="text-xs sm:text-sm lg:text-base text-slate-100 font-bold mt-0.5 leading-snug">${currentQ.hint || 'Read the food chain carefully!'}</p>
+                    </div>
+                </div>
+            `;
+
+            setTimeout(() => {
+                feedbackContainer.innerHTML = '';
+                group.index += 1;
+
+                if (group.index >= 3 && !group.finishTime) {
+                    group.finishTime = Date.now();
+                    if (!finishOrder.includes(groupId)) finishOrder.push(groupId);
+                    updateRankBadge(groupId);
+                }
+
+                renderQuestion(groupId);
+                checkAllFinished();
+            }, 1350);
+        }
+    }
+
+    function updateRankBadge(groupId) {
+        const badge = document.getElementById(`rank-badge-${groupId}`);
+        if (!badge) return;
+        const pos = finishOrder.indexOf(groupId) + 1;
+        badge.classList.remove('hidden');
+        badge.innerText = `#${pos}`;
+    }
+
+    function checkAllFinished() {
+        const allDone = [1, 2, 3, 4].every(id => gameState[id].index >= 3);
+        if (allDone) {
+            setTimeout(() => {
+                showLeaderboardModal();
+            }, 600);
+        }
+    }
+
+    function showLeaderboardModal() {
+        const modal = document.getElementById('leaderboard-modal');
+        const podiumList = document.getElementById('podium-list');
+        
+        const sortedGroups = [1, 2, 3, 4].sort((a, b) => {
+            if (gameState[b].score !== gameState[a].score) {
+                return gameState[b].score - gameState[a].score;
+            }
+            const orderA = finishOrder.indexOf(a) !== -1 ? finishOrder.indexOf(a) : 99;
+            const orderB = finishOrder.indexOf(b) !== -1 ? finishOrder.indexOf(b) : 99;
+            return orderA - orderB;
+        });
+
+        const medals = ['🥇 1st Place', '🥈 2nd Place', '🥉 3rd Place', '🏁 4th Place'];
+        const groupColors = {
+            1: 'border-red-500 text-red-200 bg-red-950/50',
+            2: 'border-emerald-500 text-emerald-200 bg-emerald-950/50',
+            3: 'border-slate-300 text-slate-100 bg-slate-900/60',
+            4: 'border-amber-400 text-amber-200 bg-amber-950/50'
+        };
+
+        let html = '';
+        sortedGroups.forEach((gId, index) => {
+            const st = gameState[gId];
+            const medal = medals[index];
+            const colorClass = groupColors[gId];
+
+            html += `
+                <div class="flex items-center justify-between gap-2 border-2 ${colorClass} p-3 rounded-xl text-left shadow-md">
+                    <div class="flex items-center gap-3">
+                        <span class="font-game text-sm sm:text-base text-amber-300 shrink-0">${medal}</span>
+                        <div>
+                            <h4 class="font-game text-base">Group ${gId} <span class="text-xs font-sans font-bold opacity-90">(${getLevelLabel(st.level)})</span></h4>
+                            <p class="text-xs sm:text-sm font-bold opacity-95">${st.correctCount}/3 Right • ${st.wrongCount} Missed</p>
+                        </div>
+                    </div>
+                    <div class="text-right shrink-0">
+                        <span class="font-game text-base text-amber-300">${st.score} Stars</span>
+                    </div>
+                </div>
+            `;
+        });
+
+        podiumList.innerHTML = html;
+
+        const winnerGroup = sortedGroups[0];
+        document.getElementById('teacher-note').innerText = 
+            `🎉 GREAT JOB! Group ${winnerGroup} (${getLevelLabel(gameState[winnerGroup].level)}) is in 1st place with ${gameState[winnerGroup].score} Stars (${gameState[winnerGroup].correctCount}/3 right answers)!`;
+
+        modal.classList.remove('hidden');
+        try { confetti({ particleCount: 80, spread: 80, origin: { y: 0.6 } }); } catch(e){}
+    }
+
+    function closeLeaderboardModal() {
+        document.getElementById('leaderboard-modal').classList.add('hidden');
+    }
+
+    function restartGroup(groupId) {
+        gameState[groupId].index = 0;
+        gameState[groupId].score = 0;
+        gameState[groupId].bridgeProgress = 0;
+        gameState[groupId].correctCount = 0;
+        gameState[groupId].wrongCount = 0;
+        gameState[groupId].finishTime = null;
+        
+        finishOrder = finishOrder.filter(id => id !== groupId);
+        document.getElementById(`score-${groupId}`).innerText = '0';
+        document.getElementById(`rank-badge-${groupId}`).classList.add('hidden');
+        renderQuestion(groupId);
+    }
+
+    function resetAllGames() {
+        finishOrder = [];
+        for (let i = 1; i <= 4; i++) restartGroup(i);
+    }
+
+    window.onload = function() {
+        for (let i = 1; i <= 4; i++) {
+            const selectEl = document.getElementById(`level-select-${i}`);
+            if (selectEl) selectEl.value = gameState[i].level;
+            renderQuestion(i);
+        }
+    };
+</script>
+</body>
+</html>
